@@ -27,9 +27,9 @@ export default function Header() {
   };
 
   return (
-    <div className="fixed w-full shadow-md dark:shadow-white/5">
-      <div className="flex justify-between w-11/12 m-auto py-2">
-        <div>Option Desk</div>
+    <div className="fixed w-full shadow-md bg-white dark:bg-slate-900 dark:shadow-white/5">
+      <div className="flex h-12 justify-between items-center w-11/12 m-auto py-2">
+        <div className="">Option Desk</div>
         <nav>
           <ul className="flex gap-4">
             {theme === "light" ? (
