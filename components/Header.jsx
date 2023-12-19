@@ -1,5 +1,6 @@
 "use client";
 
+import { setLatestData } from "@/store/LatestDataSlice";
 import { setTheme } from "@/store/themeSlice";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -8,7 +9,6 @@ export default function Header() {
   const dispatch = useDispatch();
   const theme = useSelector((store) => store.theme.theme);
   useEffect(() => {
-    // dispatch(initTheme(true));
     const sTheme = localStorage.getItem("theme");
     if (sTheme) {
       let ht = document.querySelector("html");
@@ -17,6 +17,20 @@ export default function Header() {
       dispatch(setTheme(sTheme));
     }
   }, []);
+
+  useEffect(()=> {
+    const inervelId = setInterval(()=> {
+      // TODO: Abort contrlar and change functon
+      fetch('/api/option/nifty/latest')
+      .then(res => res.json())
+      .then(data => dispatch(setLatestData(data)))
+      .catch(err=> console.log(`nifty/latest err: ${err}`))
+    },60000)
+    return () => {
+      clearInterval(inervelId)
+      console.log('ingerval cersr')
+    }
+  },[])
 
   const changeTheme = (mode) => {
     dispatch(setTheme(mode));
