@@ -4,6 +4,12 @@ import { setLatestData } from "@/store/LatestDataSlice";
 import { setTheme } from "@/store/themeSlice";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { Chart as Chartjs } from "chart.js";
+import { initDayData } from "@/store/DayDataSlice";
+
+Chartjs.defaults.borderColor = "#80808030";
+Chartjs.defaults.interaction.mode = "index";
+Chartjs.defaults.responsive = true;
 
 export default function Header() {
   const dispatch = useDispatch();
@@ -14,29 +20,67 @@ export default function Header() {
       let ht = document.querySelector("html");
       ht.classList.remove("light", "dark");
       ht.classList.add(sTheme);
+      if (sTheme === "light") {
+        Chartjs.defaults.color = "#0e1726";
+      } else {
+        Chartjs.defaults.color = "#fff";
+      }
       dispatch(setTheme(sTheme));
     }
   }, []);
 
-  useEffect(()=> {
-    const inervelId = setInterval(()=> {
-      // TODO: Abort contrlar and change functon
-      fetch('/api/option/nifty/latest')
-      .then(res => res.json())
-      .then(data => dispatch(setLatestData(data)))
-      .catch(err=> console.log(`nifty/latest err: ${err}`))
-    },60000)
-    return () => {
-      clearInterval(inervelId)
-      console.log('ingerval cersr')
+  const getLatestData = async (signal) => {
+    try {
+      const responce = await fetch("/api/option/nifty/latest", { signal });
+      const responceData = await responce.json();
+      if (responce.status === 200) {
+        // console.log(responceData);
+        dispatch(setLatestData(responceData));
+      }
+    } catch (error) {
+      console.log(error);
     }
-  },[])
+  };
+
+  const getDaytData = async (signal) => {
+    try {
+      const responce = await fetch("/api/option/nifty", { signal });
+      const responceData = await responce.json();
+      if (responce.status === 200) {
+        console.log(responceData);
+        dispatch(initDayData(responceData));
+        // dispatch(setLatestData(responceData));
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  useEffect(() => {
+    const controller = new AbortController();
+    const signal = controller.signal;
+    getLatestData(signal);
+    getDaytData(signal);
+    const inervelId = setInterval(() => {
+      // TODO: time controll
+      getLatestData(signal);
+    }, 60000);
+    return () => {
+      clearInterval(inervelId);
+      controller.abort();
+      console.log("ingerval cersr");
+    };
+  }, []);
 
   const changeTheme = (mode) => {
     dispatch(setTheme(mode));
     let ht = document.querySelector("html");
     ht.classList.remove("light", "dark");
     ht.classList.add(mode);
+    if (mode === "light") {
+      Chartjs.defaults.color = "#0e1726";
+    } else {
+      Chartjs.defaults.color = "#fff";
+    }
     localStorage.setItem("theme", mode);
   };
 

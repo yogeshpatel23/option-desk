@@ -22,13 +22,13 @@ export async function POST() {
       if (nifty) {
         nifty.data = [...nifty.data, putcall];
         nifty.save();
-        catchedData["nifty"] = nifty.data;
+        catchedData["putcall"] = nifty.data;
       } else {
         const newNifty = await Nifty.create({
           date: date.toDateString(),
           data: [putcall],
         });
-        catchedData["nifty"] = newNifty.data;
+        catchedData["putcall"] = newNifty.data;
       }
     }
 
@@ -38,13 +38,13 @@ export async function POST() {
       if (niftyoc) {
         niftyoc.data = [...niftyoc.data, ...oc];
         niftyoc.save();
-        catchedData["niftyOC"] = niftyoc.data;
+        catchedData["oc"] = niftyoc.data;
       } else {
         const newNiftyOC = await NiftyOC.create({
           date: date.toDateString(),
           data: oc,
         });
-        catchedData["niftyOC"] = newNiftyOC.data;
+        catchedData["oc"] = newNiftyOC.data;
       }
     }
 

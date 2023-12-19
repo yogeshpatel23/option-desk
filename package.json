@@ -11,6 +11,8 @@
   "dependencies": {
     "@reduxjs/toolkit": "^2.0.1",
     "chart.js": "^4.4.1",
+    "chartjs-adapter-date-fns": "^3.0.0",
+    "date-fns": "^3.0.0",
     "mongoose": "^8.0.3",
     "next": "14.0.4",
     "react": "^18",

@@ -23,38 +23,13 @@ Chartjs.register(
 const OiGraph = () => {
   const [dataSet, setDataSet] = useState({});
   const symbolData = useSelector((store) => store.latestData);
-  const theme = useSelector((store) => store.theme.theme);
 
   const options = {
-    responsive: true,
-    interaction: {
-      mode: 'index'
-    },
-    plugins: {
-      legend: {
-        labels: {
-          color: theme == "light" ? "#000" : "#fff",
-        },
-      },
-    },
+    // TODO: Can I remove this too
     scales: {
-      x: {
-        ticks: {
-          color: theme == "light" ? "#000" : "#fff",
-        },
-        grid: {
-          color: "#80808030",
-          z: -100,
-        },
-      },
       y: {
         ticks: {
-          color: theme == "light" ? "#000" : "#fff",
           callback: (v) => `${v / 1000}K`,
-        },
-        grid: {
-          color: "#80808030",
-          z: -100,
         },
       },
     },
@@ -77,7 +52,6 @@ const OiGraph = () => {
 
     setDataSet(() => ({
       labels,
-      z: 10,
       datasets: [
         {
           label: "CE",
