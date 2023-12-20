@@ -27,6 +27,9 @@ const OiGraph = () => {
   const options = {
     // TODO: Can I remove this too
     scales: {
+      x: {
+        type: "linear",
+      },
       y: {
         ticks: {
           callback: (v) => `${v / 1000}K`,

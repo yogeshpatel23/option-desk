@@ -75,7 +75,7 @@ const StrickOiChart = () => {
     const strickData = oc.filter((cs) => cs.strikePrice == selectedStrick);
     setDatasets(strickData);
     return () => {};
-  }, [oc, selectedStrick]);
+  }, [oc, latestoc, selectedStrick]);
 
   return (
     <div className="bg-white dark:bg-slate-900 rounded-2xl p-3 shadow-md">

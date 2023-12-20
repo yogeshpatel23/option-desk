@@ -34,7 +34,7 @@ export async function POST() {
 
     const niftyoc = await NiftyOC.findOne({ date: date.toDateString() });
     if (!niftyoc || date.getMinutes() % 3 === 0) {
-      console.log(oc)
+      // console.log(oc)
       if (niftyoc) {
         niftyoc.data = [...niftyoc.data, ...oc];
         niftyoc.save();

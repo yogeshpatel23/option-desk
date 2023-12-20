@@ -2,10 +2,10 @@
 
 import { setLatestData } from "@/store/LatestDataSlice";
 import { setTheme } from "@/store/themeSlice";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Chart as Chartjs } from "chart.js";
-import { initDayData } from "@/store/DayDataSlice";
+import { initDayData, updateData } from "@/store/DayDataSlice";
 
 Chartjs.defaults.borderColor = "#80808030";
 Chartjs.defaults.interaction.mode = "index";
@@ -14,6 +14,9 @@ Chartjs.defaults.responsive = true;
 export default function Header() {
   const dispatch = useDispatch();
   const theme = useSelector((store) => store.theme.theme);
+  const [isNewData, setIsNewData] = useState(false);
+  const [latestDataTime, setLatestDataTime] = useState(null);
+
   useEffect(() => {
     const sTheme = localStorage.getItem("theme");
     if (sTheme) {
@@ -34,7 +37,9 @@ export default function Header() {
       const responce = await fetch("/api/option/nifty/latest", { signal });
       const responceData = await responce.json();
       if (responce.status === 200) {
-        // console.log(responceData);
+        if (latestDataTime && latestDataTime !== responceData.putcall.time) {
+          updateData(responceData);
+        }
         dispatch(setLatestData(responceData));
       }
     } catch (error) {
@@ -47,9 +52,15 @@ export default function Header() {
       const responce = await fetch("/api/option/nifty", { signal });
       const responceData = await responce.json();
       if (responce.status === 200) {
-        console.log(responceData);
+        let date = new Date();
+        if (date.getHours() * 60 + 18 >= 558) {
+          setIsNewData(true);
+        }
+        setLatestDataTime(
+          responceData.putcall[responceData.putcall.length - 1].time
+        );
+        console.log("getdaydata called");
         dispatch(initDayData(responceData));
-        // dispatch(setLatestData(responceData));
       }
     } catch (error) {
       console.log(error);
@@ -61,8 +72,16 @@ export default function Header() {
     getLatestData(signal);
     getDaytData(signal);
     const inervelId = setInterval(() => {
-      // TODO: time controll
-      getLatestData(signal);
+      let date = new Date();
+      if (
+        date.getHours() * 60 + 18 >= 558 &&
+        date.getHours() * 60 + 30 <= 930
+      ) {
+        if (!isNewData) {
+          getDaytData(signal);
+        }
+        getLatestData(signal);
+      }
     }, 60000);
     return () => {
       clearInterval(inervelId);
@@ -88,6 +107,7 @@ export default function Header() {
     <div className="fixed w-full shadow-md bg-white dark:bg-slate-900 dark:shadow-white/5">
       <div className="flex h-12 justify-between items-center w-11/12 m-auto py-2">
         <div className="">Option Desk</div>
+        <span>{isNewData ? "newdaat" : "old data"}</span>
         <nav>
           <ul className="flex gap-4">
             {theme === "light" ? (
