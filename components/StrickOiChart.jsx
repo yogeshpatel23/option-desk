@@ -31,7 +31,7 @@ const StrickOiChart = () => {
   const [datasets, setDatasets] = useState([]);
 
   const options = {
-    responsive: true,
+    // responsive: true,
     plugins: {
       title: {
         text: `COI of ${selectedStrick}`,
@@ -80,15 +80,18 @@ const StrickOiChart = () => {
   return (
     <div className="bg-white dark:bg-slate-900 rounded-2xl p-3 shadow-md">
       <div className="flex items-center gap-2">
-        <label className="hidden md:block" htmlFor="strick">
-          Select Strike
+        <label
+          className="hidden md:block text-gray-700 dark:text-gray-300"
+          htmlFor="strick"
+        >
+          Select Strike :
         </label>
         <select
           name="strick"
           id="strick"
           value={selectedStrick}
           onChange={(e) => setSelectedStrick(e.target.value)}
-          className="flex-grow px-2 py-1 rounded-md outline outline-2 outline-gray-300 dark:bg-slate-700"
+          className="px-2 py-1 w-24 rounded-md bg-gray-300 dark:bg-slate-700"
         >
           {strickOpt.map((opt) => (
             <option key={opt} value={opt}>
@@ -97,29 +100,29 @@ const StrickOiChart = () => {
           ))}
         </select>
       </div>
-      <div>
-        <Line
-          options={options}
-          data={{
-            datasets: [
-              {
-                data: datasets,
-                label: "PE",
-                parsing: { yAxisKey: "PE.cOI" },
-                borderColor: "#2196f3",
-                backgroundColor: "#2196f3",
-              },
-              {
-                data: datasets,
-                label: "CE",
-                parsing: { yAxisKey: "CE.cOI" },
-                borderColor: "#e7515a",
-                backgroundColor: "#e7515a",
-              },
-            ],
-          }}
-        />
-      </div>
+      {/* <div className="relative w-full"> */}
+      <Line
+        options={options}
+        data={{
+          datasets: [
+            {
+              data: datasets,
+              label: "PE",
+              parsing: { yAxisKey: "PE.cOI" },
+              borderColor: "#2196f3",
+              backgroundColor: "#2196f3",
+            },
+            {
+              data: datasets,
+              label: "CE",
+              parsing: { yAxisKey: "CE.cOI" },
+              borderColor: "#e7515a",
+              backgroundColor: "#e7515a",
+            },
+          ],
+        }}
+      />
+      {/* </div> */}
     </div>
   );
 };

@@ -15,7 +15,7 @@ const DayDataSlice = createSlice({
     },
     updateData: (state, action) => {
       state.putcall.push(action.payload.putcall);
-      state.oc.concat(action.payload.oc);
+      state.oc = [...state.oc, ...action.payload.oc];
     },
   },
 });
