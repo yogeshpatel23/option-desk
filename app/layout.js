@@ -1,3 +1,4 @@
+import Footer from "@/components/Footer";
 import "./globals.css";
 import Header from "@/components/Header";
 import StoreProvider from "@/components/StoreProvider";
@@ -14,6 +15,7 @@ export default function RootLayout({ children }) {
         <StoreProvider>
           <Header />
           {children}
+          <Footer />
         </StoreProvider>
       </body>
     </html>

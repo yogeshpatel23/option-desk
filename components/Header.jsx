@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Chart as Chartjs } from "chart.js";
 import { initDayData, updateData } from "@/store/DayDataSlice";
+import Image from "next/image";
 
 Chartjs.defaults.borderColor = "#80808030";
 Chartjs.defaults.interaction.mode = "index";
@@ -116,26 +117,31 @@ export default function Header() {
     <div className="fixed w-full shadow-md bg-white dark:bg-slate-900 dark:shadow-white/5">
       <div className="flex h-12 justify-between items-center w-11/12 m-auto py-2">
         <div className="">Option Desk</div>
-        <span>{isNewData ? "newdaat" : "old data"}</span>
-        <span>{latestDataTime}</span>
         <nav>
           <ul className="flex gap-4">
             {theme === "light" ? (
               <li
-                className="cursor-pointer uppercase"
+                className="cursor-pointer hover:bg-gray-400 p-2 rounded-full"
                 onClick={() => changeTheme("dark")}
               >
-                {theme}
+                <Image src="/dark.svg" width={20} height={20} alt="light" />
               </li>
             ) : (
               <li
-                className="cursor-pointer uppercase"
+                className="cursor-pointer hover:bg-gray-400 p-2 rounded-full"
                 onClick={() => changeTheme("light")}
               >
-                {theme}
+                <Image src="/light.svg" width={20} height={20} alt="dark" />
               </li>
             )}
-            <li>Set</li>
+            <li className="cursor-pointer hover:bg-gray-400 p-2 rounded-full">
+              <Image
+                src="/settings.svg"
+                width={20}
+                height={20}
+                alt="settings"
+              />
+            </li>
           </ul>
         </nav>
       </div>
