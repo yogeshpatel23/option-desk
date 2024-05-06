@@ -15,6 +15,7 @@ export async function POST() {
   // get data from nse
   const data = await getOC("FINNIFTY", 1500);
   // save recent data in local file
+  if (!data) return NextResponse.json({ msg: "NOT_OK" }, { status: 200 });
   await storeData("latestFinNifty.json", data);
 
   try {
@@ -41,7 +42,7 @@ export async function POST() {
       if (finniftyOc) {
         finniftyOc.oc = [...finniftyOc.oc, ...data.oc];
         finniftyOc.save();
-        catchedData["oc"] == finniftyOc.oc;
+        catchedData["oc"] = finniftyOc.oc;
       } else {
         const newfinNiftyOc = await FinNiftyOc.create({
           date: date.toDateString(),

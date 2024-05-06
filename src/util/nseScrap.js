@@ -52,6 +52,10 @@ export default async function getOC(symbol, range) {
       oc,
     };
   } catch (error) {
-    console.log(error);
+    console.log(`Unable to get ${symbol} oc`);
+    // console.log(error.message);
+    // console.log(
+    //   "=============================================================="
+    // );
   }
 }

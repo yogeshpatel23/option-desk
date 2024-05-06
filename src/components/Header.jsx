@@ -34,8 +34,10 @@ const Header = () => {
       const responceData = await responce.json();
       if (responce.status === 200) {
         if (latestDataTime && latestDataTime !== responceData.meta.time) {
+          console.log("seco");
           dispatch(updateData(responceData));
         }
+        console.log("first");
         dispatch(setLatestData(responceData));
       }
     } catch (error) {}
@@ -52,10 +54,7 @@ const Header = () => {
         if (date.getHours() * 60 + date.getMinutes() >= 558) {
           setIsNewDate(() => true);
         }
-        setLatestDataTime(
-          // TODO:: chnage putcall => meta
-          responceData.meta[responceData.meta.length - 1].time
-        );
+        setLatestDataTime(responceData.meta[responceData.meta.length - 1].time);
         dispatch(initDayData(responceData));
       }
     } catch (error) {}

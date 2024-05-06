@@ -15,6 +15,7 @@ export async function POST() {
   // get data from nse
   const data = await getOC("MIDCPNIFTY", 500);
   // save recent data in local file
+  if (!data) return NextResponse.json({ msg: "NOT_OK" }, { status: 200 });
   await storeData("latestMidcapNifty.json", data);
 
   try {
@@ -45,7 +46,7 @@ export async function POST() {
       if (midcapniftyOc) {
         midcapniftyOc.oc = [...midcapniftyOc.oc, ...data.oc];
         midcapniftyOc.save();
-        catchedData["oc"] == midcapniftyOc.oc;
+        catchedData["oc"] = midcapniftyOc.oc;
       } else {
         const newmidcapNiftyOc = await MidcapNiftyOc.create({
           date: date.toDateString(),
