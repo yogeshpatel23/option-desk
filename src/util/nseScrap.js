@@ -1,3 +1,5 @@
+import { format } from "date-fns";
+
 export default async function getOC(symbol, range) {
   try {
     const url = `https://www.nseindia.com/api/option-chain-indices?symbol=${symbol}`;
@@ -10,7 +12,7 @@ export default async function getOC(symbol, range) {
     let totalPEOI = 0;
     let totalPEchageOI = 0;
     let date = new Date();
-    let time = `${date.getHours()}:${date.getMinutes()}:00`;
+    let time = `${format(date, "HH:mm")}:00`;
 
     const oc = responceData.filtered.data
       .filter(

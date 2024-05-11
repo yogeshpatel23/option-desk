@@ -7,7 +7,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./ui/select";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { initDayData, updateData } from "@/store/dayDataSlice";
 import { setLatestData } from "@/store/latestDataSlice";
 import Image from "next/image";
@@ -16,16 +16,24 @@ import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { updateColor } from "@/store/coloursSlice";
+import { setIndex } from "@/store/selectedIndexSlice";
+import { Separator } from "./ui/separator";
+import { Checkbox } from "./ui/checkbox";
+import { updateSettings } from "@/store/settingsSlice";
+import Loading from "./Loading";
 
 const Header = () => {
   const dispatch = useDispatch();
-  const [index, setIndex] = useState("nifty");
+  const index = useSelector((store) => store.selectedIndex);
+  const settings = useSelector((store) => store.settings);
   const [isNewDate, setIsNewDate] = useState(false);
   const [latestDataTime, setLatestDataTime] = useState(null);
+  const [showVol, setShowVol] = useState(settings.showVol);
+  const [showOiGraph, setShowOiGraph] = useState(settings.showOiGraph);
+  const [isloading, setIsloading] = useState(true);
   const ceColorInpRef = useRef();
   const peColorInpRef = useRef();
-
-  const theme = "dark";
+  const nocInpRef = useRef();
 
   async function getLatestData(signal) {
     let url = `/api/option/${index}/latest`;
@@ -34,10 +42,8 @@ const Header = () => {
       const responceData = await responce.json();
       if (responce.status === 200) {
         if (latestDataTime && latestDataTime !== responceData.meta.time) {
-          console.log("seco");
           dispatch(updateData(responceData));
         }
-        console.log("first");
         dispatch(setLatestData(responceData));
       }
     } catch (error) {}
@@ -63,8 +69,12 @@ const Header = () => {
   useEffect(() => {
     const controller = new AbortController();
     const signal = controller.signal;
-    getLatestData(signal);
-    getDayData(signal);
+    Promise.allSettled([getLatestData(signal), getDayData(signal)]).then(
+      (v) => {
+        console.log(v);
+        setIsloading(false);
+      }
+    );
 
     return () => {
       controller.abort();
@@ -99,19 +109,39 @@ const Header = () => {
       dispatch(updateColor(JSON.parse(colors)));
     }
 
+    const losettings = localStorage.getItem("settings");
+    if (losettings) {
+      let ld = JSON.parse(losettings);
+      setShowOiGraph(ld.showOiGraph);
+      setShowVol(ld.showVol);
+      dispatch(updateSettings(ld));
+    }
+
     return () => {};
   }, []);
 
   function handleUpdateColor() {
     let ceColor = ceColorInpRef.current.value;
     let peColor = peColorInpRef.current.value;
+    let noc = nocInpRef.current.value;
+    if (noc < 1 || noc > 5) {
+      alert("No of Chart must be between 1 - 5");
+      return;
+    }
     localStorage.setItem(
       "colors",
       JSON.stringify({ ce: ceColor, pe: peColor })
     );
+    localStorage.setItem(
+      "settings",
+      JSON.stringify({ showOiGraph, showVol, noc })
+    );
     dispatch(updateColor({ ce: ceColor, pe: peColor }));
+    dispatch(updateSettings({ showOiGraph, showVol, noc }));
   }
-
+  if (isloading) {
+    return <Loading />;
+  }
   return (
     <div className="h-12 border-b flex items-center">
       <div className="container flex justify-between items-center">
@@ -122,7 +152,7 @@ const Header = () => {
           <Select
             value={index}
             onValueChange={(v) => {
-              setIndex(v);
+              dispatch(setIndex(v));
               // setIsNewDate(false);
             }}
           >
@@ -137,7 +167,7 @@ const Header = () => {
             </SelectContent>
           </Select>
           <ul className="flex gap-4">
-            {theme === "light" ? (
+            {/* {theme === "light" ? (
               <li
                 className="cursor-pointer hover:bg-gray-400 p-2 rounded-full"
                 onClick={() => changeTheme("dark")}
@@ -151,7 +181,7 @@ const Header = () => {
               >
                 <Image src="/light.svg" width={20} height={20} alt="dark" />
               </li>
-            )}
+            )} */}
             <li className="cursor-pointer hover:bg-gray-500/20 p-2 rounded-full">
               <Popover>
                 <PopoverTrigger>
@@ -163,13 +193,11 @@ const Header = () => {
                   />
                 </PopoverTrigger>
                 <PopoverContent className="w-60">
-                  <div className="gird gap-4">
-                    <div className="space-y-2">
-                      <h4 className="font-medium leading-none">Colours</h4>
-                      <p className="text-sm text-muted-foreground">
-                        Set the colours for the charts
-                      </p>
-                    </div>
+                  <div className="space-y-2">
+                    <h4 className="font-medium leading-none">Settings</h4>
+                    <p className="text-sm text-muted-foreground">
+                      Set the colours for the charts
+                    </p>
                     <div className="gird gap-2">
                       <div className="grid grid-cols-2 items-center gap-4">
                         <Label htmlFor="ce">CE</Label>
@@ -191,14 +219,59 @@ const Header = () => {
                           className="h-8"
                         />
                       </div>
-                      <Button
-                        onClick={handleUpdateColor}
-                        className="w-full"
-                        variant="outline"
-                      >
-                        Save
-                      </Button>
                     </div>
+                    <Separator />
+                    <p className="text-sm text-muted-foreground">Set UI</p>
+                    <div className="gird gap-2">
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          checked={showVol}
+                          onCheckedChange={() => setShowVol((prev) => !prev)}
+                          id="volume"
+                        />
+                        <label
+                          htmlFor="volume"
+                          className="text-sm font-medium opacity-70"
+                        >
+                          Show Volume chart
+                        </label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          checked={showOiGraph}
+                          onCheckedChange={() =>
+                            setShowOiGraph((prev) => !prev)
+                          }
+                          id="oig"
+                        />
+                        <label
+                          htmlFor="oig"
+                          className="text-sm font-medium opacity-70"
+                        >
+                          Show Oi Graph {showOiGraph}
+                        </label>
+                      </div>
+                      <div className="grid grid-cols-2 items-center gap-4">
+                        <Label htmlFor="noc">No. of Chart</Label>
+                        <Input
+                          ref={nocInpRef}
+                          type="number"
+                          defaultValue={settings.noc}
+                          min="1"
+                          max="5"
+                          setp="1"
+                          id="noc"
+                          className="h-6 w-12 p-2"
+                        />
+                      </div>
+                    </div>
+                    <Button
+                      onClick={handleUpdateColor}
+                      className="w-full"
+                      variant="outline"
+                    >
+                      Save
+                    </Button>
                   </div>
                 </PopoverContent>
               </Popover>
