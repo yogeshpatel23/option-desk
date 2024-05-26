@@ -5,12 +5,8 @@ import { useSelector } from "react-redux";
 
 export default function Home() {
   const settings = useSelector((store) => store.settings);
-  let charts = [];
-  for (let index = 0; index < settings.noc; index++) {
-    charts.push(
-      <StrickOiChart key={index} itm={index - Math.ceil(settings.noc / 2)} />
-    );
-  }
+  const selectedSticks = useSelector((store) => store.selectedStricks);
+
   return (
     <main
       className={`p-2 md:p-4 grid items-start gap-2 ${
@@ -23,7 +19,9 @@ export default function Home() {
         </div>
       )}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 col-span-3 md:col-span-2">
-        {charts}
+        {selectedSticks.map((st) => (
+          <StrickOiChart key={st} strick={st} />
+        ))}
       </div>
     </main>
   );

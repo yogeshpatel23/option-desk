@@ -16,6 +16,8 @@ import {
 } from "recharts";
 import CustomTooltip from "./CustomToolTip";
 import { format } from "date-fns";
+import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
+import { Label } from "./ui/label";
 
 const OiGraph = () => {
   const symbolData = useSelector((store) => store.latestData);
@@ -23,6 +25,7 @@ const OiGraph = () => {
   const colors = useSelector((store) => store.colors);
   const index = useSelector((store) => store.selectedIndex);
   const [dataset, setDataset] = useState([]);
+  const [cof, setcof] = useState("coi");
   const [spread, setSpread] = useState(0);
 
   useEffect(() => {
@@ -41,6 +44,14 @@ const OiGraph = () => {
         ue = 25;
         setSpread(25);
         break;
+      case "sensex":
+        ue = 100;
+        setSpread(100);
+        break;
+      case "bankex":
+        ue = 100;
+        setSpread(100);
+        break;
 
       default:
         break;
@@ -58,6 +69,24 @@ const OiGraph = () => {
   return (
     <div className="space-y-2">
       <Card>
+        <RadioGroup
+          className="flex gap-4 pt-2 justify-center"
+          defaultValue={cof}
+          onValueChange={(v) => setcof(v)}
+        >
+          <div className="flex items-center space-x-2">
+            <RadioGroupItem value="coi" id="coi" />
+            <Label htmlFor="coi">Change In OI</Label>
+          </div>
+          <div className="flex items-center space-x-2">
+            <RadioGroupItem value="toi" id="toi" />
+            <Label htmlFor="toi">Total OI</Label>
+          </div>
+          <div className="flex items-center space-x-2">
+            <RadioGroupItem value="vol" id="vol" />
+            <Label htmlFor="vol">Volume</Label>
+          </div>
+        </RadioGroup>
         <ResponsiveContainer width="100%" aspect={1.2}>
           <BarChart
             data={dataset}
@@ -76,9 +105,25 @@ const OiGraph = () => {
             <YAxis type="category" dataKey="strikePrice" />
             <Tooltip content={<CustomTooltip />} />
             <Legend verticalAlign="top" />
-            <Bar dataKey="CE.cOI" stackId="a" name="CE" fill={colors.ce} />
+            {cof == "coi" && (
+              <>
+                <Bar dataKey="CE.cOI" stackId="a" name="CE" fill={colors.ce} />
+                <Bar dataKey="PE.cOI" stackId="b" name="PE" fill={colors.pe} />
+              </>
+            )}
+            {cof == "toi" && (
+              <>
+                <Bar dataKey="CE.OI" stackId="a" name="CE" fill={colors.ce} />
+                <Bar dataKey="PE.OI" stackId="b" name="PE" fill={colors.pe} />
+              </>
+            )}
+            {cof == "vol" && (
+              <>
+                <Bar dataKey="CE.vol" stackId="a" name="CE" fill={colors.ce} />
+                <Bar dataKey="PE.vol" stackId="b" name="PE" fill={colors.pe} />
+              </>
+            )}
             {/* <Bar dataKey="CE.OI" stackId="a" name="CE-OI" fill="#e7515a99" /> */}
-            <Bar dataKey="PE.cOI" stackId="b" name="PE" fill={colors.pe} />
             {/* <Bar dataKey="PE.OI" stackId="b" name="PE-OI" fill="#2196f399" /> */}
             <ReferenceLine
               y={Math.floor(symbolData.meta.price / spread) * spread}

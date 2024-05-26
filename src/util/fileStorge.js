@@ -9,9 +9,14 @@ export const storeData = async (filename, data) => {
 };
 
 export const getStoreData = async (filename) => {
-  const fileContent = await fs.readFile(`localData/${filename}`, {
-    encoding: "utf-8",
-  });
-  const data = JSON.parse(fileContent);
-  return data;
+  try {
+    const fileContent = await fs.readFile(`localData/${filename}`, {
+      encoding: "utf-8",
+    });
+    const data = JSON.parse(fileContent);
+    return data;
+  } catch (error) {
+    console.log(error.message);
+    return null;
+  }
 };

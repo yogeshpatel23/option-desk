@@ -12,94 +12,85 @@ import {
 } from "recharts";
 import { useSelector } from "react-redux";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "./ui/select";
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import CustomTooltip from "./CustomToolTip";
 import { format } from "date-fns";
-import { Checkbox } from "./ui/checkbox";
-import { Label } from "./ui/label";
+import { Button } from "./ui/button";
+import CompairChart from "./CompairChart";
+import CustomLegend from "./CustomLegend";
 
-const StrickOiChart = ({ itm }) => {
+const StrickOiChart = ({ strick }) => {
   const oc = useSelector((store) => store.dayData.oc);
   const latestData = useSelector((store) => store.latestData);
-  const index = useSelector((store) => store.selectedIndex);
   const colors = useSelector((store) => store.colors);
   const settings = useSelector((store) => store.settings);
 
-  const [strickOpt, setStrickOpt] = useState([]);
-  const [selectedStrick, setSelectedStrick] = useState("");
+  const strics = latestData.oc.map((e) => e.strikePrice);
+  const currentStrickIndex = strics.indexOf(strick);
+  const thisStrick = latestData.oc[currentStrickIndex];
+  const prevStrick =
+    currentStrickIndex !== 0 && latestData.oc[currentStrickIndex - 1];
+  const nextStrick =
+    currentStrickIndex !== strics.length - 1 &&
+    latestData.oc[currentStrickIndex + 1];
+
   const [dataset, setDataset] = useState([]);
-  const [autoStrick, setAutoStrick] = useState(true);
 
   useEffect(() => {
-    setStrickOpt(() => latestData.oc.map((e) => e.strikePrice));
-    if (autoStrick) {
-      let ltp = latestData.meta.price;
-      let spread = 0;
-      switch (index) {
-        case "nifty":
-        case "finnifty":
-          spread = 50;
-          break;
-        case "banknifty":
-          spread = 100;
-          break;
-        case "midcapnifty":
-          spread = 25;
-          break;
-
-        default:
-          break;
-      }
-      setSelectedStrick(Math.floor(ltp / spread) * spread + itm * spread);
-    }
-    return () => {};
-  }, [latestData]);
-
-  useEffect(() => {
-    if (selectedStrick == "") return;
-    const strickData = oc.filter((cs) => cs.strikePrice == selectedStrick);
+    if (strick == "") return;
+    const strickData = oc.filter((cs) => cs.strikePrice == strick);
     setDataset(strickData);
     return () => {};
-  }, [oc, selectedStrick]);
+  }, [oc]);
 
   return (
     <Card className={`p-2 ${settings.showVol ? "col-span-2" : ""}`}>
-      <div className="flex gap-2 items-center">
-        <Select
-          value={selectedStrick}
-          disabled={autoStrick}
-          onValueChange={(v) => {
-            setSelectedStrick(v);
-          }}
-        >
-          <SelectTrigger className="w-48">
-            <SelectValue placeholder="Select Strick" />
-          </SelectTrigger>
-          <SelectContent>
-            {strickOpt.map((so) => (
-              <SelectItem key={so} value={so}>
-                {so}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <Checkbox
-          checked={autoStrick}
-          onCheckedChange={() => setAutoStrick((prev) => !prev)}
-          id={`autostrick${itm}`}
-        />
-        <Label htmlFor={`autostrick${itm}`}>Auto Select</Label>
+      <div className="flex items-center gap-4">
+        <p className="text-xs">{strick}</p>
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button variant="outline" className="p-2 h-6 text-xs">
+              Compair
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-4xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-4 text-sm">
+                <div>
+                  <span>Compair</span>
+                  <span className="text-red-500 mx-2">{strick}</span>
+                  <span>With</span>
+                  <span className="text-red-500 mx-2">
+                    {prevStrick.strikePrice}
+                  </span>
+                  <span>&</span>
+                  <span className="text-red-500 mx-2">
+                    {nextStrick.strikePrice}
+                  </span>
+                </div>
+              </DialogTitle>
+              {/* <DialogDescription> */}
+              <CompairChart
+                strick={strick}
+                prevStrick={prevStrick.strikePrice}
+                nextStrick={nextStrick.strikePrice}
+              />
+              {/* </DialogDescription> */}
+            </DialogHeader>
+          </DialogContent>
+        </Dialog>
       </div>
       <div className="flex">
         <ResponsiveContainer width="100%" aspect={2}>
           <LineChart
             data={dataset}
-            margin={{ top: 20, right: 20, bottom: 20, left: 0 }}
+            syncId="anyId"
+            margin={{ top: 10, right: 0, bottom: 0, left: 0 }}
           >
             <XAxis
               dataKey="time"
@@ -110,12 +101,13 @@ const StrickOiChart = ({ itm }) => {
             />
             <YAxis
               label={{
-                value: "Change in OI",
+                value: "Chng OI",
                 angle: -90,
+                fontSize: 12,
                 position: "insideLeft",
               }}
               tickFormatter={(value) =>
-                new Intl.NumberFormat("en-IN", {
+                new Intl.NumberFormat("en-US", {
                   notation: "compact",
                   compactDisplay: "short",
                 }).format(value)
@@ -123,7 +115,14 @@ const StrickOiChart = ({ itm }) => {
               tick={{ fontSize: 12 }}
             />
             <Tooltip content={<CustomTooltip />} />
-            <Legend />
+            <Legend
+              content={
+                <CustomLegend
+                  ceVol={thisStrick.CE.vol}
+                  peVol={thisStrick.PE.vol}
+                />
+              }
+            />
             <Line
               type="monotone"
               dataKey="CE.cOI"
@@ -151,6 +150,7 @@ const StrickOiChart = ({ itm }) => {
                 tickFormatter={(val) =>
                   format(new Date(`1970-1-1 ${val}`), "HH:mm")
                 }
+                tick={{ fontSize: 12 }}
               />
               <YAxis
                 label={{
@@ -159,11 +159,12 @@ const StrickOiChart = ({ itm }) => {
                   position: "insideLeft",
                 }}
                 tickFormatter={(value) =>
-                  new Intl.NumberFormat("en-IN", {
+                  new Intl.NumberFormat("en-US", {
                     notation: "compact",
                     compactDisplay: "short",
                   }).format(value)
                 }
+                tick={{ fontSize: 12 }}
               />
               <Tooltip content={<CustomTooltip />} />
               <Legend />

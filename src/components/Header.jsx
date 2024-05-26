@@ -4,6 +4,7 @@ import {
   Select,
   SelectContent,
   SelectItem,
+  SelectSeparator,
   SelectTrigger,
   SelectValue,
 } from "./ui/select";
@@ -21,6 +22,8 @@ import { Separator } from "./ui/separator";
 import { Checkbox } from "./ui/checkbox";
 import { updateSettings } from "@/store/settingsSlice";
 import Loading from "./Loading";
+import StrickSelector from "./StrickSelector";
+import { setStricks } from "@/store/selectedStrickSlice";
 
 const Header = () => {
   const dispatch = useDispatch();
@@ -71,7 +74,6 @@ const Header = () => {
     const signal = controller.signal;
     Promise.allSettled([getLatestData(signal), getDayData(signal)]).then(
       (v) => {
-        console.log(v);
         setIsloading(false);
       }
     );
@@ -145,18 +147,22 @@ const Header = () => {
   return (
     <div className="h-12 border-b flex items-center">
       <div className="container flex justify-between items-center">
-        <div className="dark:text-white text-xl font-bold">
+        <div className="dark:text-white hidden md:block text-xl font-bold">
           OPTION <span className="text-red-600">DESK</span>{" "}
+        </div>
+        <div className="dark:text-white block md:hidden text-xl font-bold">
+          O<span className="text-red-600">d</span>
         </div>
         <div className="flex items-center gap-2">
           <Select
             value={index}
             onValueChange={(v) => {
               dispatch(setIndex(v));
+              dispatch(setStricks([]));
               // setIsNewDate(false);
             }}
           >
-            <SelectTrigger className="w-48">
+            <SelectTrigger className="w-32">
               <SelectValue placeholder="Index" />
             </SelectTrigger>
             <SelectContent>
@@ -164,24 +170,13 @@ const Header = () => {
               <SelectItem value="banknifty">BankNifty</SelectItem>
               <SelectItem value="finnifty">FinNifty</SelectItem>
               <SelectItem value="midcapnifty">MidcapNifty</SelectItem>
+              <SelectSeparator />
+              <SelectItem value="sensex">Sensex</SelectItem>
+              <SelectItem value="bankex">Bankex</SelectItem>
             </SelectContent>
           </Select>
+          <StrickSelector />
           <ul className="flex gap-4">
-            {/* {theme === "light" ? (
-              <li
-                className="cursor-pointer hover:bg-gray-400 p-2 rounded-full"
-                onClick={() => changeTheme("dark")}
-              >
-                <Image src="/dark.svg" width={20} height={20} alt="light" />
-              </li>
-            ) : (
-              <li
-                className="cursor-pointer hover:bg-gray-400 p-2 rounded-full"
-                onClick={() => changeTheme("light")}
-              >
-                <Image src="/light.svg" width={20} height={20} alt="dark" />
-              </li>
-            )} */}
             <li className="cursor-pointer hover:bg-gray-500/20 p-2 rounded-full">
               <Popover>
                 <PopoverTrigger>
@@ -222,7 +217,7 @@ const Header = () => {
                     </div>
                     <Separator />
                     <p className="text-sm text-muted-foreground">Set UI</p>
-                    <div className="gird gap-2">
+                    <div className="grid gap-2">
                       <div className="flex items-center space-x-2">
                         <Checkbox
                           checked={showVol}
@@ -251,8 +246,10 @@ const Header = () => {
                           Show Oi Graph {showOiGraph}
                         </label>
                       </div>
-                      <div className="grid grid-cols-2 items-center gap-4">
-                        <Label htmlFor="noc">No. of Chart</Label>
+                      <div className="grid grid-cols-3 items-center gap-4">
+                        <Label htmlFor="noc" className="text-xs col-span-2">
+                          No. of ITM/OTM Chart
+                        </Label>
                         <Input
                           ref={nocInpRef}
                           type="number"
@@ -261,7 +258,7 @@ const Header = () => {
                           max="5"
                           setp="1"
                           id="noc"
-                          className="h-6 w-12 p-2"
+                          className="h-6 w-12 p-2 "
                         />
                       </div>
                     </div>
